@@ -588,6 +588,51 @@ nav.main-nav a:hover { border-color: var(--gold); color: var(--burgundy); }
   line-height: 1.2;
 }
 
+/* ---------- Zalo contact card ---------- */
+.zalo-card {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: fit-content;
+  max-width: 100%;
+  margin: 16px auto 32px;
+  background: var(--white);
+  border-radius: 20px;
+  padding: 12px 26px 12px 12px;
+  box-shadow: var(--shadow-strong);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.zalo-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 24px 48px rgba(44, 30, 20, 0.28);
+}
+.zalo-qr {
+  width: 88px;
+  height: 88px;
+  border-radius: 10px;
+  flex-shrink: 0;
+  border: 1px solid var(--cream-soft);
+}
+.zalo-text {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+.zalo-label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--ink-soft);
+}
+.zalo-cta {
+  font-family: 'Playfair Display', serif;
+  font-size: 21px;
+  font-weight: 700;
+  color: #0068ff;
+  line-height: 1.25;
+}
+
 /* ---------- Lead form ---------- */
 .lead-section .container { max-width: 640px; }
 .lead-form { display: flex; flex-direction: column; gap: 16px; }
