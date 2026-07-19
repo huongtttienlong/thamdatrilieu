@@ -668,6 +668,7 @@ footer.site-footer {
   .therapy-wrap { grid-template-columns: 1fr; }
   nav.main-nav { display: none; }
   .specs-table td { padding: 13px 18px; font-size: 14px; }
+  .nav-wrap .btn--primary { padding: 10px 18px; font-size: 13px; white-space: nowrap; }
 }
 
 .skip-link {
