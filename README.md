@@ -39,4 +39,32 @@ Thông tin khách để lại (họ tên, SĐT, ghi chú) lưu tại `data/leads
 
 ## Triển khai (deploy)
 
-Đây là ứng dụng Node.js có backend (không phải site tĩnh thuần), cần host hỗ trợ chạy Node liên tục, ví dụ: Render, Railway, VPS riêng... Nhớ cấu hình biến môi trường `ADMIN_PASSWORD`, `SESSION_SECRET`, `PORT` trên nơi triển khai.
+Đây là ứng dụng Node.js có backend (không phải site tĩnh thuần) — **không deploy được lên Vercel** vì Vercel chạy theo kiểu serverless (ổ đĩa tạm, không giữ được `data/leads.json` và phiên đăng nhập admin giữa các lượt truy cập). Cần host hỗ trợ chạy Node liên tục. Hướng dẫn dưới đây dùng **Render** (có gói miễn phí).
+
+### Deploy lên Render — các bước
+
+Repo Git cục bộ đã được khởi tạo sẵn tại thư mục này (`thamdatrilieu/`), đã commit đầy đủ code (không kèm `.env` hay `data/*.json`). Còn 3 bước sau cần tự làm (đăng nhập tài khoản là việc chỉ chủ tài khoản mới làm được):
+
+1. **Đưa code lên GitHub** (nếu chưa có sẵn repo):
+   - Vào [github.com/new](https://github.com/new), tạo 1 repo mới (ví dụ `thamdatrilieu`), để trống, không tick thêm README.
+   - Trong thư mục `thamdatrilieu/` trên máy, chạy:
+     ```
+     git remote add origin https://github.com/<ten-tai-khoan>/thamdatrilieu.git
+     git branch -M main
+     git push -u origin main
+     ```
+2. **Tạo dịch vụ trên Render**:
+   - Đăng nhập [render.com](https://render.com) (có thể dùng tài khoản GitHub để đăng nhập nhanh).
+   - Chọn **New > Blueprint**, trỏ tới repo `thamdatrilieu` vừa tạo — Render sẽ tự đọc file `render.yaml` đã có sẵn trong repo và cấu hình đúng lệnh build/start.
+   - Nếu không dùng Blueprint, chọn **New > Web Service** thủ công với: Build command `npm install`, Start command `npm start`.
+3. **Khai báo biến môi trường** trong tab Environment của service trên Render:
+   - `ADMIN_PASSWORD` — đặt mật khẩu quản trị mới, khác giá trị mẫu trong `.env.example`.
+   - `SESSION_SECRET` — một chuỗi ngẫu nhiên bất kỳ, càng dài càng tốt.
+   - (Không cần khai báo `PORT`, Render tự cấp qua biến môi trường và server đã đọc `process.env.PORT`.)
+   - Bấm Deploy. Sau khi build xong, Render cấp sẵn 1 địa chỉ dạng `https://thamdatrilieu-jm365.onrender.com` — có thể trỏ tên miền riêng vào đó sau trong tab Custom Domain.
+
+### Lưu ý về dữ liệu khách hàng khi dùng gói Render miễn phí
+
+Gói miễn phí của Render **không có ổ đĩa lưu trữ lâu dài** — dữ liệu trong `data/leads.json` sẽ mất khi service khởi động lại hoặc deploy bản mới (dù vẫn giữ được bình thường trong lúc service đang chạy). Để tránh mất thông tin khách để lại:
+- Nên vào trang quản trị (`/admin`) xuất CSV định kỳ (hàng ngày/hàng tuần) để lưu lại, hoặc
+- Khi lượng khách hàng để lại thông tin tăng lên, nên nâng cấp sang gói có Persistent Disk của Render, hoặc chuyển sang lưu vào một database ngoài (ví dụ Postgres) để không phụ thuộc vào ổ đĩa tạm.
