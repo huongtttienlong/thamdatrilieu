@@ -511,6 +511,82 @@ nav.main-nav a:hover { border-color: var(--gold); color: var(--burgundy); }
 }
 .faq-answer p { color: var(--ink-soft); font-size: 14.5px; margin: 0; }
 
+/* ---------- Hotline badge ---------- */
+.hotline-badge {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: fit-content;
+  max-width: 100%;
+  margin: 0 auto 32px;
+  background: var(--white);
+  border-radius: 999px;
+  padding: 10px 28px 10px 10px;
+  box-shadow: var(--shadow-strong);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+.hotline-badge:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 24px 48px rgba(44, 30, 20, 0.28);
+}
+.hotline-icon {
+  position: relative;
+  flex-shrink: 0;
+  width: 56px;
+  height: 56px;
+}
+.hotline-bubble {
+  width: 56px;
+  height: 56px;
+  border-radius: 50% 50% 50% 6px;
+  background: linear-gradient(135deg, #93d13e, #5a9f22);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 8px 16px rgba(90, 159, 34, 0.4);
+  transform: rotate(-8deg);
+}
+.hotline-bubble svg {
+  width: 26px;
+  height: 26px;
+  fill: var(--white);
+  transform: rotate(8deg);
+}
+.hotline-247 {
+  position: absolute;
+  top: -6px;
+  left: -8px;
+  z-index: 1;
+  background: var(--white);
+  color: #5a9f22;
+  font-size: 10px;
+  font-weight: 800;
+  letter-spacing: 0.3px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 2px solid #93d13e;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.15);
+}
+.hotline-text {
+  display: flex;
+  flex-direction: column;
+  text-align: left;
+}
+.hotline-label {
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: var(--ink-soft);
+}
+.hotline-number {
+  font-family: 'Playfair Display', serif;
+  font-size: 25px;
+  font-weight: 700;
+  color: #e0392b;
+  line-height: 1.2;
+}
+
 /* ---------- Lead form ---------- */
 .lead-section .container { max-width: 640px; }
 .lead-form { display: flex; flex-direction: column; gap: 16px; }

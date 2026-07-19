@@ -16,7 +16,7 @@ Mở `http://localhost:3000`. Trang quản trị tại `http://localhost:3000/ad
 ## Việc cần làm trước khi đưa lên internet thật
 
 1. **Đổi mật khẩu quản trị** và `SESSION_SECRET` trong `.env` (đừng dùng giá trị mẫu).
-2. ~~Số điện thoại, địa chỉ~~ — đã cập nhật số thật (Mr Sáng: 0866 2626 88) và địa chỉ thật (Thủy Nguyên, Khu đô thị Ecopark, xã Phụng Công, Hưng Yên) trong `public/index.html` và footer.
+2. ~~Số điện thoại, địa chỉ~~ — đã cập nhật số thật (Mr Sáng: 0866 262 688) và địa chỉ thật (Thủy Nguyên, Khu đô thị Ecopark, xã Phụng Công, Hưng Yên) trong `public/index.html` và footer.
 3. ~~Hình ảnh sản phẩm~~ — đã thay bằng ảnh thật trích từ tài liệu hướng dẫn sử dụng JM365 (ảnh phòng ngủ, ảnh thảm, sơ đồ bộ điều khiển, bộ phụ kiện 5-trong-1) tại `public/assets/`. Nếu có thêm ảnh thật chụp sản phẩm/khách hàng thực tế thì càng tốt cho độ tin cậy.
 4. ~~Video demo~~ — đã bỏ khối video mượn tạm từ YouTube (rủi ro bản quyền) khỏi hero, thay bằng ảnh hero thật. Nếu sau này có video sản phẩm tự quay, có thể chèn lại vào section hero.
 5. ~~Testimonials~~ — đã bỏ mục đánh giá khách hàng minh hoạ (tránh rủi ro đánh giá giả), thay bằng mục "Cam kết từ chúng tôi" (bảo hành, chuẩn Hàn Quốc, giao hàng, tư vấn). Khi có đánh giá thật từ khách hàng đã mua (kèm sự đồng ý của họ), nên bổ sung lại mục testimonials.
