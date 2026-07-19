@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Đăng nhập quản trị - Thảm Đa Trị Liệu</title>
+<meta name="robots" content="noindex, nofollow">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Arimo:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  body {
+    margin: 0;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f4c430;
+    font-family: 'Arimo', Arial, sans-serif;
+  }
+  .box {
+    background: #fff;
+    padding: 36px 32px;
+    border-radius: 16px;
+    box-shadow: 0 10px 30px rgba(43,33,9,0.25);
+    width: 100%;
+    max-width: 360px;
+  }
+  h1 {
+    font-family: 'Anton', sans-serif;
+    font-size: 20px;
+    text-transform: uppercase;
+    color: #2b2109;
+    margin: 0 0 6px;
+    text-align: center;
+  }
+  p.sub { text-align: center; color: #6b5c33; font-size: 13px; margin-bottom: 20px; }
+  label { font-size: 13px; font-weight: 700; color: #2b2109; display: block; margin-bottom: 6px; }
+  input {
+    width: 100%;
+    padding: 12px 14px;
+    border-radius: 10px;
+    border: 1px solid #e4d7ae;
+    font-size: 14px;
+    margin-bottom: 16px;
+    box-sizing: border-box;
+  }
+  button {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 999px;
+    background: #c8402a;
+    color: #fff;
+    font-family: 'Anton', sans-serif;
+    letter-spacing: 0.4px;
+    text-transform: uppercase;
+    font-size: 14px;
+    cursor: pointer;
+  }
+  button:hover { background: #a5321f; }
+  .msg { font-size: 13px; color: #a5321f; margin-top: 12px; min-height: 16px; text-align: center; }
+</style>
+</head>
+<body>
+  <form class="box" id="loginForm">
+    <h1>Trang quản trị</h1>
+    <p class="sub">Thảm Đa Trị Liệu - Đăng nhập để xem thống kê</p>
+    <label for="password">Mật khẩu quản trị</label>
+    <input type="password" id="password" name="password" required autocomplete="current-password">
+    <button type="submit">Đăng nhập</button>
+    <p class="msg" id="msg" role="status" aria-live="polite"></p>
+  </form>
+
+<script>
+  document.getElementById('loginForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var password = document.getElementById('password').value;
+    var msg = document.getElementById('msg');
+    msg.textContent = 'Đang kiểm tra...';
+    fetch('/api/admin/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ password: password }),
+    })
+      .then(function (res) { return res.json().then(function (data) { return { ok: res.ok, data: data }; }); })
+      .then(function (result) {
+        if (result.ok && result.data.ok) {
+          window.location.href = '/admin';
+        } else {
+          msg.textContent = (result.data && result.data.error) || 'Sai mật khẩu.';
+        }
+      })
+      .catch(function () { msg.textContent = 'Không thể kết nối máy chủ.'; });
+  });
+</script>
+</body>
+</html>

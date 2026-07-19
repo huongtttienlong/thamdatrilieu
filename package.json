@@ -1,0 +1,15 @@
+{
+  "name": "thamdatrilieu-landing",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Landing page ban Tham Massage tri lieu JM 365 - thuong hieu Tham Da Tri Lieu",
+  "scripts": {
+    "start": "node server/index.js",
+    "dev": "node server/index.js"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "express-session": "^1.18.1"
+  }
+}

@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Quản trị - Thảm Đa Trị Liệu</title>
+<meta name="robots" content="noindex, nofollow">
+<link href="https://fonts.googleapis.com/css2?family=Anton&family=Arimo:wght@400;700&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    font-family: 'Arimo', Arial, sans-serif;
+    background: #fdf6e3;
+    color: #2b2109;
+  }
+  header {
+    background: #2b2109;
+    color: #fff;
+    padding: 16px 24px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  header h1 {
+    font-family: 'Anton', sans-serif;
+    font-size: 18px;
+    margin: 0;
+    text-transform: uppercase;
+  }
+  header button {
+    background: #c8402a;
+    color: #fff;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 999px;
+    cursor: pointer;
+    font-size: 13px;
+  }
+  main { max-width: 1100px; margin: 0 auto; padding: 24px; }
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 16px;
+    margin-bottom: 28px;
+  }
+  .stat-card {
+    background: #fff;
+    border-radius: 14px;
+    padding: 18px 20px;
+    box-shadow: 0 6px 18px rgba(43,33,9,0.08);
+  }
+  .stat-card .label { font-size: 12px; color: #6b5c33; margin-bottom: 6px; }
+  .stat-card .value { font-family: 'Anton', sans-serif; font-size: 26px; color: #c8402a; }
+  section.panel {
+    background: #fff;
+    border-radius: 14px;
+    padding: 20px;
+    box-shadow: 0 6px 18px rgba(43,33,9,0.08);
+    margin-bottom: 24px;
+  }
+  section.panel h2 { font-size: 15px; margin: 0 0 16px; text-transform: uppercase; font-family: 'Anton', sans-serif; }
+  .chart { display: flex; align-items: flex-end; gap: 8px; height: 140px; }
+  .chart .bar-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px; height: 100%; justify-content: flex-end; }
+  .chart .bar { width: 100%; background: linear-gradient(180deg, #f4c430, #d9a017); border-radius: 6px 6px 0 0; min-height: 2px; }
+  .chart .bar-label { font-size: 10px; color: #6b5c33; white-space: nowrap; }
+  table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  th, td { text-align: left; padding: 10px 12px; border-bottom: 1px solid #f0e6c8; }
+  th { color: #6b5c33; font-size: 12px; text-transform: uppercase; }
+  .export-link {
+    display: inline-block;
+    margin-top: 10px;
+    font-size: 13px;
+    color: #c8402a;
+    font-weight: 700;
+  }
+  .empty { color: #9a8a5c; font-size: 13px; padding: 12px 0; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Quản trị Thảm Đa Trị Liệu</h1>
+  <button id="logoutBtn" type="button">Đăng xuất</button>
+</header>
+
+<main>
+  <div class="stat-grid">
+    <div class="stat-card">
+      <div class="label">Tổng lượt truy cập</div>
+      <div class="value" id="statVisits">-</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Lượt truy cập hôm nay</div>
+      <div class="value" id="statVisitsToday">-</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Khách để lại thông tin</div>
+      <div class="value" id="statLeads">-</div>
+    </div>
+    <div class="stat-card">
+      <div class="label">Tỷ lệ chuyển đổi</div>
+      <div class="value" id="statConversion">-</div>
+    </div>
+  </div>
+
+  <section class="panel">
+    <h2>Lượt truy cập 14 ngày gần nhất</h2>
+    <div class="chart" id="chart"></div>
+  </section>
+
+  <section class="panel">
+    <h2>Danh sách khách hàng để lại thông tin</h2>
+    <table id="leadsTable">
+      <thead>
+        <tr><th>Thời gian</th><th>Họ tên</th><th>Số điện thoại</th><th>Ghi chú</th><th>Nguồn</th></tr>
+      </thead>
+      <tbody id="leadsBody"></tbody>
+    </table>
+    <div class="empty" id="leadsEmpty" style="display:none;">Chưa có khách hàng nào để lại thông tin.</div>
+    <a class="export-link" href="/api/admin/leads.csv">⬇ Xuất danh sách CSV</a>
+  </section>
+</main>
+
+<script>
+  function fmtDate(iso) {
+    var d = new Date(iso);
+    return d.toLocaleString('vi-VN');
+  }
+
+  fetch('/api/admin/stats')
+    .then(function (res) {
+      if (res.status === 401) { window.location.href = '/admin/login.html'; return null; }
+      return res.json();
+    })
+    .then(function (data) {
+      if (!data) return;
+      document.getElementById('statVisits').textContent = data.totalVisits;
+      document.getElementById('statVisitsToday').textContent = data.visitsToday;
+      document.getElementById('statLeads').textContent = data.totalLeads;
+      document.getElementById('statConversion').textContent = data.conversionRate + '%';
+
+      var chart = document.getElementById('chart');
+      var max = Math.max.apply(null, data.visitsByDay.map(function (d) { return d.count; }).concat([1]));
+      data.visitsByDay.forEach(function (d) {
+        var wrap = document.createElement('div');
+        wrap.className = 'bar-wrap';
+        var bar = document.createElement('div');
+        bar.className = 'bar';
+        bar.style.height = Math.max(4, (d.count / max) * 110) + 'px';
+        bar.title = d.day + ': ' + d.count;
+        var label = document.createElement('div');
+        label.className = 'bar-label';
+        label.textContent = d.day.slice(5);
+        wrap.appendChild(bar);
+        wrap.appendChild(label);
+        chart.appendChild(wrap);
+      });
+      if (!data.visitsByDay.length) {
+        chart.innerHTML = '<div class="empty">Chưa có dữ liệu lượt truy cập.</div>';
+      }
+
+      var body = document.getElementById('leadsBody');
+      if (!data.leads.length) {
+        document.getElementById('leadsEmpty').style.display = 'block';
+      } else {
+        data.leads.forEach(function (l) {
+          var tr = document.createElement('tr');
+          tr.innerHTML =
+            '<td>' + fmtDate(l.ts) + '</td>' +
+            '<td>' + l.name.replace(/</g, '&lt;') + '</td>' +
+            '<td>' + l.phone.replace(/</g, '&lt;') + '</td>' +
+            '<td>' + (l.note || '').replace(/</g, '&lt;') + '</td>' +
+            '<td>' + (l.source || '').replace(/</g, '&lt;') + '</td>';
+          body.appendChild(tr);
+        });
+      }
+    })
+    .catch(function () {});
+
+  document.getElementById('logoutBtn').addEventListener('click', function () {
+    fetch('/api/admin/logout', { method: 'POST' }).then(function () {
+      window.location.href = '/admin/login.html';
+    });
+  });
+</script>
+</body>
+</html>
