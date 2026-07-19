@@ -43,7 +43,7 @@ h1, h2, h3, h4 {
 }
 
 h1 { font-size: clamp(20px, 3.6vw, 38px); text-wrap: balance; }
-h2 { font-size: clamp(24px, 3.2vw, 34px); }
+h2 { font-size: clamp(20px, 2.9vw, 30px); text-wrap: balance; }
 h3 { font-size: 19px; }
 
 p { color: var(--ink-soft); }
@@ -95,7 +95,8 @@ img, video { max-width: 100%; display: block; }
   max-width: 640px;
   margin: 0 auto 40px;
   opacity: 0.92;
-  font-size: 16px;
+  font-size: 15px;
+  text-wrap: balance;
 }
 
 .card {
