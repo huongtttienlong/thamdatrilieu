@@ -65,6 +65,25 @@ Repo Git cục bộ đã được khởi tạo sẵn tại thư mục này (`tha
 
 ### Lưu ý về dữ liệu khách hàng khi dùng gói Render miễn phí
 
-Gói miễn phí của Render **không có ổ đĩa lưu trữ lâu dài** — dữ liệu trong `data/leads.json` sẽ mất khi service khởi động lại hoặc deploy bản mới (dù vẫn giữ được bình thường trong lúc service đang chạy). Để tránh mất thông tin khách để lại:
-- Nên vào trang quản trị (`/admin`) xuất CSV định kỳ (hàng ngày/hàng tuần) để lưu lại, hoặc
-- Khi lượng khách hàng để lại thông tin tăng lên, nên nâng cấp sang gói có Persistent Disk của Render, hoặc chuyển sang lưu vào một database ngoài (ví dụ Postgres) để không phụ thuộc vào ổ đĩa tạm.
+Gói miễn phí của Render **không có ổ đĩa lưu trữ lâu dài** — nếu **không** cấu hình database bên ngoài, dữ liệu trong `data/leads.json` sẽ mất khi service khởi động lại hoặc deploy bản mới. Backend đã hỗ trợ sẵn 2 lớp an toàn (bật bằng biến môi trường, không bật thì tự chạy bằng file như cũ):
+
+#### 1) Lưu vĩnh viễn vào MongoDB (khuyến nghị)
+
+Khi có biến `MONGODB_URI`, toàn bộ lượt truy cập và lead được lưu vào MongoDB thay vì file — không mất khi restart. Vẫn xem/xuất CSV qua `/admin` như bình thường.
+
+- Tạo cluster miễn phí tại [mongodb.com/atlas](https://www.mongodb.com/atlas) (gói **M0 Free**, dung lượng 512MB, miễn phí vĩnh viễn).
+- Tạo 1 database user (đặt username/password), và ở mục **Network Access** chọn **Allow access from anywhere** (0.0.0.0/0) để Render kết nối được.
+- Bấm **Connect > Drivers**, copy chuỗi kết nối dạng `mongodb+srv://<user>:<password>@...` — nhớ thay `<password>` bằng mật khẩu thật.
+- Trên Render, tab **Environment**, thêm biến `MONGODB_URI` = chuỗi kết nối đó. (Tuỳ chọn: `MONGODB_DB` để đổi tên database, mặc định `thamdatrilieu`.)
+
+#### 2) Nhận email mỗi khi có khách mới (khuyến nghị đi kèm)
+
+Khi có `RESEND_API_KEY` và `NOTIFY_EMAIL`, mỗi lead mới sẽ được gửi email báo ngay (họ tên, SĐT, ghi chú) — dữ liệu nằm vĩnh viễn trong hòm mail, xem được ngay trên điện thoại.
+
+- Đăng ký miễn phí tại [resend.com](https://resend.com) (free 3.000 email/tháng), vào **API Keys** tạo 1 key.
+- Trên Render, tab **Environment**, thêm:
+  - `RESEND_API_KEY` = key vừa tạo.
+  - `NOTIFY_EMAIL` = email muốn nhận thông báo (nên dùng chính email đã đăng ký Resend để không cần xác minh tên miền).
+  - (Tuỳ chọn: `NOTIFY_FROM` = địa chỉ gửi đi; mặc định `onboarding@resend.dev`. Muốn gửi từ email thương hiệu riêng thì cần xác minh tên miền trong Resend trước.)
+
+Sau khi thêm biến môi trường, Render tự deploy lại; các tính năng trên tự bật. Nếu **không** cấu hình gì, trang vẫn chạy bình thường bằng file (và nên xuất CSV định kỳ từ `/admin`).

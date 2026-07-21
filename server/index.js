@@ -4,6 +4,7 @@ const crypto = require('crypto');
 const express = require('express');
 const session = require('express-session');
 const store = require('./store');
+const { notifyNewLead } = require('./notify');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -57,13 +58,15 @@ function detectDevice(ua) {
 app.post('/api/track', (req, res) => {
   const { page, referrer } = req.body || {};
   const ua = req.headers['user-agent'] || '';
-  store.addVisit({
-    ts: new Date().toISOString(),
-    page: typeof page === 'string' ? page.slice(0, 200) : '/',
-    referrer: typeof referrer === 'string' ? referrer.slice(0, 300) : '',
-    device: detectDevice(ua),
-    ipHash: hashIp(getClientIp(req)),
-  });
+  Promise.resolve(
+    store.addVisit({
+      ts: new Date().toISOString(),
+      page: typeof page === 'string' ? page.slice(0, 200) : '/',
+      referrer: typeof referrer === 'string' ? referrer.slice(0, 300) : '',
+      device: detectDevice(ua),
+      ipHash: hashIp(getClientIp(req)),
+    })
+  ).catch(() => {});
   res.status(204).end();
 });
 
@@ -72,7 +75,7 @@ function isValidPhone(phone) {
   return /^[0-9+][0-9 .-]{7,14}$/.test(String(phone || '').trim());
 }
 
-app.post('/api/leads', (req, res) => {
+app.post('/api/leads', async (req, res) => {
   const { name, phone, note, source } = req.body || {};
   const cleanName = String(name || '').trim().slice(0, 120);
   const cleanPhone = String(phone || '').trim().slice(0, 20);
@@ -84,16 +87,24 @@ app.post('/api/leads', (req, res) => {
     return res.status(400).json({ ok: false, error: 'Vui long nhap so dien thoai hop le.' });
   }
 
-  const lead = store.addLead({
-    id: crypto.randomUUID(),
-    ts: new Date().toISOString(),
-    name: cleanName,
-    phone: cleanPhone,
-    note: String(note || '').trim().slice(0, 500),
-    source: String(source || '').trim().slice(0, 100),
-  });
+  try {
+    const lead = await store.addLead({
+      id: crypto.randomUUID(),
+      ts: new Date().toISOString(),
+      name: cleanName,
+      phone: cleanPhone,
+      note: String(note || '').trim().slice(0, 500),
+      source: String(source || '').trim().slice(0, 100),
+    });
 
-  res.json({ ok: true, id: lead.id });
+    // Gửi email thông báo (không chặn phản hồi cho khách)
+    notifyNewLead(lead).catch(() => {});
+
+    res.json({ ok: true, id: lead.id });
+  } catch (err) {
+    console.error('Lỗi lưu lead:', err.message);
+    res.status(500).json({ ok: false, error: 'Co loi xay ra, vui long thu lai.' });
+  }
 });
 
 // --- Admin auth ---
@@ -125,9 +136,8 @@ app.get('/admin', (req, res) => {
   return res.redirect('/admin/login.html');
 });
 
-app.get('/api/admin/stats', requireAdmin, (req, res) => {
-  const visits = store.getVisits();
-  const leads = store.getLeads();
+app.get('/api/admin/stats', requireAdmin, async (req, res) => {
+  const [visits, leads] = await Promise.all([store.getVisits(), store.getLeads()]);
 
   const byDay = {};
   for (const v of visits) {
@@ -152,8 +162,8 @@ app.get('/api/admin/stats', requireAdmin, (req, res) => {
   });
 });
 
-app.get('/api/admin/leads.csv', requireAdmin, (req, res) => {
-  const leads = store.getLeads();
+app.get('/api/admin/leads.csv', requireAdmin, async (req, res) => {
+  const leads = await store.getLeads();
   const header = 'Thoi gian,Ho ten,So dien thoai,Ghi chu,Nguon\n';
   const rows = leads
     .map((l) =>
